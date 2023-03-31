@@ -1,0 +1,10 @@
+bpm = 60;
+
+loop (4) {
+    loop (4) {
+        play("piano", "C4", 1/4);
+    }
+    loop (4) {
+        wait(1/2);
+    }
+}

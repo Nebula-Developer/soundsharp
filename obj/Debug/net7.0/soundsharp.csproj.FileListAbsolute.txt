@@ -1,0 +1,15 @@
+/Users/nicocook/Documents/soundsharp/bin/Debug/net7.0/soundsharp
+/Users/nicocook/Documents/soundsharp/bin/Debug/net7.0/soundsharp.deps.json
+/Users/nicocook/Documents/soundsharp/bin/Debug/net7.0/soundsharp.runtimeconfig.json
+/Users/nicocook/Documents/soundsharp/bin/Debug/net7.0/soundsharp.dll
+/Users/nicocook/Documents/soundsharp/bin/Debug/net7.0/soundsharp.pdb
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.csproj.AssemblyReference.cache
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.AssemblyInfoInputs.cache
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.AssemblyInfo.cs
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.csproj.CoreCompileInputs.cache
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.dll
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/refint/soundsharp.dll
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.pdb
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/soundsharp.genruntimeconfig.cache
+/Users/nicocook/Documents/soundsharp/obj/Debug/net7.0/ref/soundsharp.dll
