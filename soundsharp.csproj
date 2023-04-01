@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- <PackageReference Include="managedbass" Version="3.1.1" /> -->
+    <PackageReference Include="managedbass.fx" Version="3.1.1" />
+    <PackageReference Include="naudio" Version="2.1.0" />
+    <PackageReference Include="opentk" Version="4.7.7" />
   </ItemGroup>
 
 </Project>

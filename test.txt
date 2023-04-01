@@ -1,10 +1,15 @@
-bpm = 60;
 
-loop (4) {
-    loop (4) {
-        play("piano", "C4", 1/4);
+thread() {
+    loop (99) {
+        play(click.wav, C5, 1/2);
     }
-    loop (4) {
-        wait(1/2);
-    }
+
+    test
+
+    loop (2) { test }
+    loop (2) { test }
+}
+
+loop (5) {
+    play(piano.wav, C4, 1);
 }
