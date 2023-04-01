@@ -41,11 +41,12 @@ public static class Audio {
         return (octave - 4) * 12 + note;
     }
 
-    public static void Play(string path, string key) {
+    public static void Play(string path, string key, int volume = 100) {
         // Load path and pitch it up 5 semitones
-        int stream = Bass.CreateStream(path, 0, 0, BassFlags.Decode);
+        int stream = Bass.CreateStream("samples/" + path + ".wav", 0, 0, BassFlags.Decode);
         int pitch = BassFx.TempoCreate(stream, BassFlags.Default);
         Bass.ChannelSetAttribute(pitch, ChannelAttribute.Pitch, KeysToSemiRelToC4(key));
+        Bass.ChannelSetAttribute(pitch, ChannelAttribute.Volume, volume / 100f);
 
         // Play the stream
         Bass.ChannelPlay(pitch);

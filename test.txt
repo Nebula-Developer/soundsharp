@@ -1,18 +1,27 @@
 
+channel (1) {
+    loop (100) {
+        play(hihat, C4, 1);
+        play(hihat, C4, 1);
+        play(hihat, C4, 1);
+        play(hihat, C4, 1);
+    }
+}
+
 channel (2) {
-    loop (16) {
-        bpm(100);
-        loop (3) {
-            play(click.wav, B3, 1/3);
-            play(click.wav, A3, 1/3);
-            play(click.wav, A3, 1/3);
-        }
+    wait(1);
+    loop (100) {
+        play(snare, C4, 1.25);
+        play(snare, C4, 2);
+        play(snare, C4, 3/4);
+    }
+}
 
-        play(click.wav, B3, 1/3);
-            play(click.wav, A3, 1/3);
+channel (3) {
+    loop (100) {
+        play(kick, C4, 1/2);
+        play(kick, C4, 2);
 
-        bpm(200);
-        play(click.wav, A3, 1/3);
-        play(click.wav, A3, 1/3);
+        play(kick, C4, 1.5);
     }
 }

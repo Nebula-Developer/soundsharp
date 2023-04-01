@@ -18,8 +18,8 @@ public class Session {
                 return numerator / denominator;
         }
 
-        int result = 0;
-        if (int.TryParse(value, out result)) return result;
+        double result = 0;
+        if (double.TryParse(value, out result)) return result;
         return null;
     }
 
@@ -27,117 +27,6 @@ public class Session {
         int result = 0;
         if (int.TryParse(value, out result)) return result;
         return null;
-    }
-}
-
-public class ClockEvent {
-    public double CallTime = 0;
-    public double Time = 0;
-    public int Channel = 0;
-    
-    public enum Type {
-        Wait,
-        Play,
-        BPM
-    }
-
-    public Type EventType = Type.Wait;
-    public string? File = null;
-    public string? Key = null;
-    public int? bpm = null;
-}
-
-public class ClockChannel {
-    public double Time = 0;
-    public List<ClockEvent> Events = new();
-}
-
-public class ClockSystem {
-    public int BPM = 120;
-    public List<ClockChannel> Channels = new();
-
-    public void AddEvent(int channel, double time, string? file = null, string? key = null) {
-        if (Channels.Count <= channel) {
-            for (int i = Channels.Count; i <= channel; i++) Channels.Add(new ClockChannel());
-        }
-
-        ClockChannel clockChannel = Channels[channel];
-
-        clockChannel.Events.Add(new ClockEvent() {
-            CallTime = clockChannel.Time,
-            EventType = file == null ? ClockEvent.Type.Wait : ClockEvent.Type.Play,
-            Channel = channel,
-            Time = time,
-            File = file,
-            Key = key
-        });
-
-        clockChannel.Events.Sort((a, b) => a.CallTime.CompareTo(b.CallTime));
-        clockChannel.Time += time;
-    }
-
-    public void AddBPMEvent(int channel, int bpm) {
-        if (Channels.Count <= channel) {
-            for (int i = Channels.Count; i <= channel; i++) Channels.Add(new ClockChannel());
-        }
-
-        ClockChannel clockChannel = Channels[channel];
-
-        clockChannel.Events.Add(new ClockEvent() {
-            CallTime = clockChannel.Time,
-            EventType = ClockEvent.Type.BPM,
-            bpm = bpm
-        });
-
-        Console.WriteLine(clockChannel.Time);
-        clockChannel.Events.Sort((a, b) => a.CallTime.CompareTo(b.CallTime));
-    }
-
-    public void ExecuteEvents() {
-        List<ClockEvent> events = new();
-        foreach (ClockChannel channel in Channels) events.AddRange(channel.Events);
-        events.Sort((a, b) => a.CallTime.CompareTo(b.CallTime));
-
-        double BPMTime = 60000 / BPM;
-
-        Stopwatch stopwatch = new();
-        stopwatch.Start();
-
-        double endTime = (events[events.Count - 1].CallTime * BPMTime) + (BPMTime * 4);
-        double currentTime = 0;
-
-        int[] currentEvent = new int[Channels.Count];
-
-        while (currentTime < endTime) {
-            currentTime = stopwatch.ElapsedMilliseconds;
-            for (int i = 0; i < Channels.Count; i++) {
-                ClockChannel channel = Channels[i];
-                if (currentEvent[i] < channel.Events.Count && currentTime >= channel.Events[currentEvent[i]].CallTime * BPMTime) {
-                    ClockEvent clockEvent = channel.Events[currentEvent[i]];
-
-                    if (clockEvent.EventType == ClockEvent.Type.BPM) {
-                        Console.WriteLine($"Changed BPM to {clockEvent.bpm} at {clockEvent.CallTime * BPMTime}ms");
-                        int oldBPM = BPM;
-                        BPM = clockEvent.bpm ?? 120;
-                        BPMTime = 60000 / BPM;
-                        // Update the time of all events to match new bpm
-                        // (move all events forward by the difference in time)
-                        double difference = (currentTime - (clockEvent.CallTime * BPMTime)) / BPMTime;
-                        for (int j = currentEvent[i]; j < channel.Events.Count; j++) {
-                            channel.Events[j].CallTime += difference;
-                        }
-                    } else if (clockEvent.EventType == ClockEvent.Type.Wait) {
-                        // Console.WriteLine($"Waited {clockEvent.Time * BPMTime}ms");
-                    } else if (clockEvent.EventType == ClockEvent.Type.Play && clockEvent.File != null) {
-                        // Console.WriteLine($"Played {clockEvent.File} at {clockEvent.Key}" + " - " + channel.Events[currentEvent[i]].CallTime * BPMTime);
-                        Audio.Play(clockEvent.File, clockEvent.Key ?? "C4");
-                    }
-
-                    currentEvent[i]++;
-                }
-            }
-            Thread.Sleep(1);
-        }
     }
 }
 
@@ -163,6 +52,11 @@ public class Reader {
         Indent++;
         string indentString = new string(' ', (Indent - 1) * 4);
 
+        Stopwatch debug = new Stopwatch();
+        debug.Start();
+
+        double replaceStart = debug.Elapsed.TotalMilliseconds;
+
         List<string> functionContentArr = new List<string>();
         Regex functionContentsRegex = new Regex(FunctionContentsRegex);
 
@@ -179,6 +73,9 @@ public class Reader {
             }
         }
 
+        double replaceEnd = debug.Elapsed.TotalMilliseconds;
+        Console.WriteLine(indentString + "Replaced function contents in " + (replaceEnd - replaceStart) + "ms.");
+
         // name(args) { content }
         // Capture:
         // (name)((args)) { (everything beyond, until end of line/string)
@@ -189,11 +86,17 @@ public class Reader {
         // (name)((args))
         Regex callRegex = new Regex(@"([a-zA-Z0-9]+)\s*\(([^)]*)\)\s*");
 
+        double loopStart = debug.Elapsed.TotalMilliseconds;
+        List<double> functionRegexTimes = new List<double>();
+        List<double> callRegexTimes = new List<double>();
+
         foreach (string line in lines) {
             string trimmedLine = line.Trim();
             if (trimmedLine.Length == 0) continue;
             string trimmedLineLower = trimmedLine.ToLower();
             // Console.WriteLine("\"" + line + "\"");
+
+            double functionRegexStart = debug.Elapsed.TotalMilliseconds;
 
             Match functionMatch = functionRegex.Match(trimmedLine);
             if (functionMatch.Success) {
@@ -220,6 +123,12 @@ public class Reader {
                 }
             }
 
+            double functionRegexEnd = debug.Elapsed.TotalMilliseconds;
+            functionRegexTimes.Add(functionRegexEnd - functionRegexStart);
+
+
+            double callRegexStart = debug.Elapsed.TotalMilliseconds;
+
             Match callMatch = callRegex.Match(trimmedLine);
             if (callMatch.Success) {
                 string name = callMatch.Groups[1].Value.ToLower();
@@ -235,22 +144,63 @@ public class Reader {
                     case "play":
                         string[] argsArr = args.Split(',');
                         if (argsArr.Length < 2) break;
-                        string file = argsArr[0].Trim();
-                        string key = argsArr[1].Trim();
+
+                        string sample = argsArr[0].Trim();
+                        string note = argsArr[1].Trim();
+
                         double? lengthN = argsArr.Length > 2 ? Session.ParseDouble(argsArr[2].Trim()) : null;
                         double length = lengthN ?? 0;
 
-                        Session.System.AddEvent(channel, length, file, key);
+                        Session.System.AddNoteEvent(channel, sample, note, length);
                         break;
 
                     case "wait":
                         double? time = Session.ParseDouble(args);
                         if (time == null) break;
-                        Session.System.AddEvent(channel, time.Value, null, null);
+
+                        Session.System.AddWaitEvent(channel, time.Value);
+                        break;
+
+                    case "chord":
+                        string[] chordArgs = args.Split(',');
+                        if (chordArgs.Length < 3) break;
+                        string chordFile = chordArgs[0].Trim();
+                        double? chordLengthN = chordArgs.Length > 1 ? Session.ParseDouble(chordArgs[1].Trim()) : null;
+                        double chordLength = chordLengthN ?? 0;
+
+                        string[] keys = new string[chordArgs.Length - 2];
+                        for (int i = 2; i < chordArgs.Length; i++) keys[i - 2] = chordArgs[i].Trim();
+
+                        foreach (string k in keys) Session.System.AddNoteEvent(channel, chordFile, k, 0);
+                        Session.System.AddWaitEvent(channel, chordLength);
+                        break;
+
+                    case "roll":
+                        string[] rollArgs = args.Split(',');
+                        if (rollArgs.Length < 3) break;
+                        string rollFile = rollArgs[0].Trim();
+                        double? rollLengthN = rollArgs.Length > 1 ? Session.ParseDouble(rollArgs[1].Trim()) : null;
+                        double rollLength = rollLengthN ?? 0;
+
+                        string[] rollKeys = new string[rollArgs.Length - 2];
+                        for (int i = 2; i < rollArgs.Length; i++) rollKeys[i - 2] = rollArgs[i].Trim();
+
+                        foreach (string k in rollKeys) Session.System.AddNoteEvent(channel, rollFile, k, (rollLength / rollKeys.Length));
                         break;
                 }
+
+                double callRegexEnd = debug.Elapsed.TotalMilliseconds;
+                callRegexTimes.Add(callRegexEnd - callRegexStart);
             }
         }
+
+        double loopEnd = debug.Elapsed.TotalMilliseconds;
+        Console.WriteLine(indentString + "Looped through lines in " + (loopEnd - loopStart) + "ms.");
+
+        double functionRegexAvg = functionRegexTimes.Count > 0 ? functionRegexTimes.Average() : 0;
+        double callRegexAvg = callRegexTimes.Count > 0 ? callRegexTimes.Average() : 0;
+        Console.WriteLine(indentString + "Average function regex time: " + functionRegexAvg + "ms.");
+        Console.WriteLine(indentString + "Average call regex time: " + callRegexAvg + "ms.");
 
         Indent--;
     }
