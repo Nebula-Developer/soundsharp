@@ -10,28 +10,35 @@ namespace SoundSharp;
 public static class Audio {
     public static int KeysToSemiRelToC4(string key) {
         key = key.ToLower();
-        int distance = 0;
+        // Example:
+        // C4 = 0
+        // C#4 = 1
+        // D4 = 2
+        // C5 = 12
+        // C3 = -12
+
         int octave = 0;
-        char note = key[0];
-        if (key.Length > 2) octave = int.Parse(key[2].ToString());
-        else if (key.Length > 1) octave = int.Parse(key[1].ToString());
-
-        switch (note) {
-            case 'c': distance = 0; break;
-            case 'd': distance = 2; break;
-            case 'e': distance = 4; break;
-            case 'f': distance = 5; break;
-            case 'g': distance = 7; break;
-            case 'a': distance = 9; break;
-            case 'b': distance = 11; break;
+        int note = 0;
+        switch (key[0]) {
+            case 'c': note = 0; break;
+            case 'd': note = 2; break;
+            case 'e': note = 4; break;
+            case 'f': note = 5; break;
+            case 'g': note = 7; break;
+            case 'a': note = 9; break;
+            case 'b': note = 11; break;
+            default: note = 0; break;
         }
 
-        if (key.Length > 1) {
-            if (key[1] == '#') distance++;
-            else if (key[1] == 'b') distance--;
+        if (key.Length > 2) {
+            octave = int.Parse(key.Substring(2));
+            if (key[1] == '#') note++;
+            else if (key[1] == 'b') note--;
+        } else {
+            octave = int.Parse(key.Substring(1));
         }
 
-        return (octave - 4) * 12 + distance;
+        return (octave - 4) * 12 + note;
     }
 
     public static void Play(string path, string key) {
